@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beyond Strategy Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<style>
+/* VOICE: a quiet working tool for event day: fast to read at arm's length, nothing decorative.
+   IDEA: a gate scanner plus a clipboard guest list.
+   PICTURE: the camera viewfinder on Scan; full-colour green/amber/red result screens.
+   COLOUR and TYPE: same paper, navy and thin brand rule as the pass; Montserrat headings, Inter text.
+   LAYOUT: one column on phones; scanner beside manual entry from 900px. */
+:root{color-scheme:light;--bg:#f4f5f9;--paper:#fff;--ink:#0b1440;--ink2:#454d70;--mute:#737a98;--line:#e1e4ee;--navy:#0a1462;--blue:#1636d8;--ok:#0b8a5e;--okbg:#e4f5ed;--warn:#a96a12;--warnbg:#fdf2df;--bad:#c8304f;--badbg:#fceaee;--rule:linear-gradient(90deg,#45f0e6,#8fb2ff 45%,#d58af5 75%,#f39bd6)}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+.page{max-width:1000px;margin:0 auto;padding:0 16px 32px}
+.bar{display:flex;justify-content:space-between;align-items:center;padding:16px 0 12px}
+.wm{display:flex;flex-direction:column;line-height:1}
+.wm b{font:600 17px/1 Montserrat,sans-serif;letter-spacing:.3em;color:var(--navy)}
+.wm small{font:600 8px/1 Montserrat,sans-serif;letter-spacing:.5em;color:var(--mute);margin-top:5px}
+.k{font-size:12px;font-weight:600;color:var(--mute)}
+.rule{height:3px;border-radius:3px;background:var(--rule);margin-bottom:16px}
+h1,h2,h3{font-family:Montserrat,sans-serif;margin:0;line-height:1.2}
+h1{font-size:23px;font-weight:700}
+h2{font-size:16px;font-weight:700}
+p{margin:0}
+.mute{color:var(--ink2);font-size:14px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:16px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--ink);font:600 15px Inter,sans-serif;text-decoration:none;cursor:pointer;white-space:nowrap}
+.btn.primary{background:var(--navy);border-color:var(--navy);color:#fff}
+.btn.small{min-height:40px;padding:0 12px;font-size:14px}
+.btn.danger{color:var(--bad)}
+.btn.block{width:100%}
+.btn[disabled]{opacity:.5;pointer-events:none}
+.btn:active{transform:scale(.98)}
+:focus-visible{outline:3px solid #8fb2ff;outline-offset:2px}
+input,select,textarea{width:100%;min-height:46px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--ink);font:16px Inter,sans-serif}
+textarea{min-height:130px;resize:vertical;line-height:1.45}
+label{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin:12px 0 5px}
+.err{color:var(--bad);font-size:14px;font-weight:600;margin-top:10px;min-height:1.2em}
+.demo{font-size:13px;background:#fff8e8;border:1px solid #f1dcae;color:#6b4d12;border-radius:12px;padding:10px 12px;margin-bottom:14px}
+.demo a{color:#6b4d12;font-weight:600}
+.login{max-width:440px;margin:8px auto 0}
+.login .btn{width:100%;margin-top:16px}
+.head{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.stats .top{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.stats .big{font:700 28px/1 Montserrat,sans-serif;font-variant-numeric:tabular-nums}
+.stats .big small{font:500 15px Inter,sans-serif;color:var(--ink2)}
+.meter{height:8px;border-radius:8px;background:var(--bg);margin:12px 0 14px;overflow:hidden}
+.meter i{display:block;height:100%;border-radius:8px;background:var(--navy);transition:width .5s}
+.sgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.sgrid small{display:block;font-size:12px;color:var(--mute);font-weight:600}
+.sgrid b{display:block;font-size:15px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;background:#e8eaf2;border-radius:12px;padding:4px;margin:14px 0}
+.seg button{min-height:42px;border:0;border-radius:9px;background:none;font:600 14px Inter,sans-serif;color:var(--ink2);cursor:pointer}
+.seg button[aria-selected=true]{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(11,20,64,.12)}
+.scan-grid{display:grid;gap:14px}
+.vf{position:relative;aspect-ratio:1;width:100%;max-width:520px;margin:0 auto;border-radius:16px;overflow:hidden;background:#0b1440}
+.vf video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.vf .frame{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.laser{position:absolute;left:16%;right:16%;top:20%;height:2px;background:#8fb2ff;box-shadow:0 0 10px #8fb2ff;display:none}
+.vf.on .laser{display:block;animation:sweep 2s ease-in-out infinite alternate}
+@keyframes sweep{to{top:78%}}
+.idle{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:14px;padding:24px;text-align:center;color:#d5dafa}
+.vf.on .idle{display:none}
+.idle p{font-size:14px;max-width:28ch}
+.idle .btn{background:#fff;color:var(--navy);border:0}
+.vf-bar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;max-width:520px;margin:10px auto 0}
+.inline{display:flex;gap:8px;margin-top:10px}.inline input{flex:1}
+.recent{list-style:none;margin:8px 0 0;padding:0}
+.recent li{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:14px}
+.recent li:first-child{border-top:0}
+.recent time{color:var(--mute);white-space:nowrap;font-variant-numeric:tabular-nums}
+.r-ok{color:var(--ok)}.r-already{color:var(--warn)}.r-notfound{color:var(--bad)}
+.tools{display:grid;gap:10px;margin-bottom:12px}
+.tools-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{min-height:38px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:#fff;font:600 13px Inter,sans-serif;color:var(--ink2);cursor:pointer;white-space:nowrap}
+.chips button[aria-pressed=true]{background:var(--navy);border-color:var(--navy);color:#fff}
+.glist{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.g{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:12px 14px;border-top:1px solid var(--line);cursor:pointer}
+.g:first-child{border-top:0}.g:hover{background:#fafbfd}
+.g b{display:block;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.g span.s{display:block;font-size:13px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.g .end{display:flex;gap:8px;align-items:center}
+.pill{font-size:12px;font-weight:600;padding:4px 9px;border-radius:999px;white-space:nowrap}
+.pill.in{background:var(--okbg);color:var(--ok)}.pill.wait{background:var(--bg);color:var(--ink2)}
+.empty{padding:30px 16px;text-align:center;color:var(--ink2);font-size:14px}
+.add-grid{display:grid;gap:14px}
+.add-grid p{font-size:14px;color:var(--ink2);margin-top:4px}
+.preview{font-size:14px;color:var(--ink2);margin:8px 0 12px;min-height:1.4em}
+.f2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 10px}
+.links{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.ov{position:fixed;inset:0;z-index:40}
+.drawer{background:rgba(11,20,64,.5);display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-width:560px;max-height:92vh;overflow:auto;background:#fff;border-radius:18px 18px 0 0;padding:18px 16px 28px;animation:up .25s ease both}
+@keyframes up{from{transform:translateY(30px);opacity:0}}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:4px}
+.box{margin-top:12px;padding:12px;border-radius:12px;background:var(--bg)}
+.box .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.mini-qr{width:190px;aspect-ratio:1;background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px;margin:12px auto 0}
+.mini-qr canvas{width:100%;height:100%;display:block}
+.result{display:grid;place-items:center;padding:28px;text-align:center;color:#fff;cursor:pointer;z-index:60}
+.result.ok{background:var(--ok)}.result.already{background:#c7861a}.result.notfound{background:var(--bad)}
+.result .ic{width:84px;height:84px;border-radius:50%;background:rgba(255,255,255,.2);display:grid;place-items:center;font:700 44px Montserrat,sans-serif;margin:0 auto 16px}
+.result h2{font-size:30px}
+.result p{margin-top:8px;font-size:17px;opacity:.95}
+.result .who{font:700 22px/1.25 Montserrat,sans-serif;margin-top:14px}
+.result small{display:block;margin-top:22px;opacity:.8;font-size:14px}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:70;background:var(--ink);color:#fff;font-weight:600;font-size:14px;padding:11px 16px;border-radius:12px;max-width:calc(100% - 32px);text-align:center}
+.loading{padding:60px 0;text-align:center;color:var(--mute)}
+.spin{width:30px;height:30px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--navy);margin:0 auto 12px;animation:rot .9s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+footer{margin-top:28px;font-size:13px;color:var(--mute)}
+@media(min-width:700px){.drawer{align-items:stretch;justify-content:flex-end}.sheet{max-height:none;height:100%;border-radius:0;max-width:480px}.add-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(min-width:900px){.scan-grid{grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);align-items:start}.vf,.vf-bar{margin-left:0}}
+@media(max-width:420px){.f2{grid-template-columns:minmax(0,1fr)}.g .qbtn{display:none}}
+/* poster theme (same night-blue, gradient and sparkle as the attendee pass) */
+:root{color-scheme:dark;--bg:rgba(4,10,51,.55);--paper:rgba(12,24,104,.62);--ink:#f2f4ff;--ink2:#b6bfea;--mute:#8f99cf;--line:rgba(170,185,255,.24);--navy:#0a1462;--blue:#8fb2ff;--ok:#18b57f;--okbg:rgba(63,240,180,.15);--bad:#e0456a;--chip:linear-gradient(90deg,#8af4ef,#c3c8ff 55%,#eab3f3)}
+html{background:#040a33}
+body{font-family:Montserrat,system-ui,sans-serif;background:radial-gradient(700px 520px at 100% -6%,rgba(47,107,255,.6),transparent 62%),radial-gradient(640px 520px at -20% 105%,rgba(196,92,240,.38),transparent 60%),linear-gradient(165deg,#040a33 0%,#0a1568 55%,#1430c4 100%) fixed;min-height:100vh}
+h1,h2,h3{font-weight:800}
+.wm b{color:#fff;font-weight:500}
+.card{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:20px}
+.btn,.seg button,.chips button,input,select,textarea,.toast{font-family:Montserrat,sans-serif}
+.btn{background:rgba(255,255,255,.07);color:var(--ink);border-radius:999px}
+.btn.primary{background:var(--chip);color:#0a1462;border:0;font-weight:800}
+.btn.danger{color:#ff8fab;border-color:rgba(255,111,145,.4)}
+input,select,textarea{background:rgba(4,10,51,.6);color:var(--ink)}
+input::placeholder,textarea::placeholder{color:#7480bd}
+.err{color:#ff8fab}
+.demo{background:rgba(255,198,92,.12);border-color:rgba(255,198,92,.38);color:#ffe2a8}.demo a{color:#ffe2a8}
+.stats .big small{font-family:Montserrat,sans-serif}
+.meter i{background:linear-gradient(90deg,#45f0e6,#d58af5)}
+.seg{background:rgba(4,10,51,.55);border:1px solid var(--line);border-radius:999px}
+.seg button{border-radius:999px;color:var(--ink2);font-weight:700}
+.seg button[aria-selected=true]{background:var(--chip);color:#0a1462;box-shadow:none}
+.vf{background:#020623;border:1px solid var(--line);border-radius:22px}
+.vf .frame path{stroke:#45f0e6}
+.laser{background:linear-gradient(90deg,#45f0e6,#8fb2ff,#f39bd6);box-shadow:0 0 14px #45f0e6;height:3px}
+.idle .btn{background:var(--chip);color:#0a1462}
+.chips button{background:none;color:var(--ink2)}
+.chips button[aria-pressed=true]{background:rgba(143,178,255,.22);border-color:#8fb2ff;color:#fff}
+.glist{background:rgba(4,10,51,.4)}
+.g:hover{background:rgba(255,255,255,.05)}
+.pill.in{color:#3ff0b4}
+.r-ok{color:#3ff0b4}.r-already{color:#ffc65c}.r-notfound{color:#ff8fab}
+.drawer{background:rgba(2,6,35,.66)}
+.sheet{background:linear-gradient(170deg,#0e1c86,#08115a);border:1px solid var(--line)}
+.toast{background:#fff;color:#0a1462;font-weight:700;border-radius:999px}
+.spin{border-color:rgba(255,255,255,.15);border-top-color:#45f0e6}
+.result.ok{background:#0e9e6e}
+.vf.flash{animation:flash .7s ease-out}
+@keyframes flash{0%{box-shadow:0 0 0 0 rgba(63,240,180,.9)}100%{box-shadow:0 0 0 24px rgba(63,240,180,0)}}
+.result>div{animation:rpop .4s cubic-bezier(.2,1.4,.4,1)}
+.result .ic{animation:rpop .5s .1s cubic-bezier(.2,1.8,.4,1) backwards}
+@keyframes rpop{from{transform:scale(.7);opacity:0}}
+.meter i{box-shadow:0 0 12px rgba(69,240,230,.6)}
+#confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:80}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="bar">
+    <span class="wm" aria-label="MOKRA Consulting"><b>MOKRA</b><small>CONSULTING</small></span>
+    <span class="k">Registration desk</span>
+  </header>
+  <div class="rule"></div>
+  <div id="demoNote"></div>
+  <main id="app"><div class="loading"><div class="spin"></div>Loading…</div></main>
+  <footer>Beyond Strategy · 12 Dec 2026 · MOKRA Consulting committee only</footer>
+</div>
+<div class="ov drawer" id="drawer" hidden></div>
+<div class="ov result" id="result" hidden></div>
+<div class="toast" id="toast" role="status" hidden></div>
+<canvas id="confetti" aria-hidden="true"></canvas>
+<input type="file" id="snap" accept="image/*" capture="environment" hidden>
+
+<script>
+(() => {
+'use strict';
+// Only if you host this file outside Apps Script (e.g. GitHub Pages for live camera): paste the desk /exec URL.
+const API_URL = 'https://script.google.com/macros/s/AKfycbxwZTvBPspL6DC4da15YVzhuCAZSfHNSidof__Ykx7VpKB2lTAiv2eFhzWPStomZIaJ/exec';
+const EVENT = { name: 'Beyond Strategy: Consulting & Career Lab', date: 'Saturday 12 December 2026', time: '11.00–17.30', place: '9th Floor, Lecturer Room, Professor M.L. Pin Malakul, SWU Services Building' };
+const TYPES = ['Participant', 'Committee', 'Partner club', 'Speaker', 'Guest'];
+
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const mk = kind => ({ get(k) { try { return JSON.parse(window[kind].getItem(k)); } catch (e) { return null; } }, set(k, v) { try { window[kind].setItem(k, JSON.stringify(v)); } catch (e) {} }, del(k) { try { window[kind].removeItem(k); } catch (e) {} } });
+const local = mk('localStorage'), sess = mk('sessionStorage');
+const fmtTime = iso => { if (!iso) return ''; const d = new Date(iso); return isNaN(d) ? String(iso) : d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Bangkok' }); };
+const hasGAS = () => typeof google !== 'undefined' && google.script && google.script.run;
+const DEMO = !hasGAS() && !API_URL;
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function confetti() {
+  if (reduced) return;
+  const cv = $('#confetti'), ctx = cv.getContext('2d'), W = cv.width = innerWidth, H = cv.height = innerHeight;
+  const cols = ['#45f0e6', '#8fb2ff', '#d58af5', '#f39bd6', '#ffffff'];
+  const ps = Array.from({ length: 140 }, () => ({ x: W / 2 + (Math.random() - .5) * 80, y: H * .4, vx: (Math.random() - .5) * 14, vy: -Math.random() * 15 - 4, s: 4 + Math.random() * 6, r: Math.random() * 6, vr: (Math.random() - .5) * .3, c: cols[Math.floor(Math.random() * cols.length)] }));
+  const t0 = performance.now();
+  const step = now => { ctx.clearRect(0, 0, W, H);
+    ps.forEach(p => { p.vy += .42; p.x += p.vx; p.y += p.vy; p.r += p.vr; ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.c; ctx.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2); ctx.restore(); });
+    if (now - t0 < 2800) requestAnimationFrame(step); else ctx.clearRect(0, 0, W, H); };
+  requestAnimationFrame(step);
+}
+// arrival counter ticks up; the desk celebrates each quarter of guests arriving
+let shownArrived = null, lastMilestone = null;
+function countUp(el, from, to) {
+  if (!el) return;
+  if (reduced || from === null || from === to) { el.textContent = to; return; }
+  const t0 = performance.now();
+  const f = now => { const k = Math.min(1, (now - t0) / 700); el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(f); };
+  requestAnimationFrame(f);
+}
+const MILESTONES = { 1: 'A quarter of our guests are in!', 2: 'Halfway there!', 3: 'Three quarters in. Nearly full!', 4: 'Everyone is here. Full house!' };
+function toast(m) { const t = $('#toast'); t.textContent = m; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => { t.hidden = true; }, 2600); }
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); toast('Copied'); return; } catch (e) {}
+  const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select();
+  let ok = false; try { ok = document.execCommand('copy'); } catch (e) {} ta.remove(); toast(ok ? 'Copied' : 'Copy was blocked here');
+}
+
+/* ---------- backend ---------- */
+function call(action, p = {}) {
+  if (hasGAS()) return new Promise((res, rej) => google.script.run
+    .withSuccessHandler(r => (r && r.ok) ? res(r.data) : rej(new Error((r && r.error) || 'Something went wrong')))
+    .withFailureHandler(e => rej(new Error((e && e.message) || 'Could not reach the server'))).api(action, p));
+  if (API_URL) return fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ action }, p)) })
+    .then(r => r.json()).then(r => { if (!r.ok) throw new Error(r.error || 'Something went wrong'); return r.data; });
+  return mock(action, p);
+}
+/* preview only: sample guests kept in this browser (shared with the pass preview) */
+const SAMPLE = [
+  ['Ploy Srisuk', 'ploy.s@example.com', '', 'Chulalongkorn University', 'Commerce and Accountancy', '3', 'Participant', '', ''],
+  ['Tanakorn Wongsa', 'tanakorn.w@example.com', '', 'Thammasat University', 'Economics', '4', 'Participant', '11:09', 'Mint'],
+  ['Natcha Boonmee', 'natcha.b@example.com', '', 'Srinakharinwirot University', 'Business Administration', '2', 'Participant', '', ''],
+  ['Kittipat Charoen', 'kittipat.c@example.ac.th', 'kittipat.c@example.com', 'Mahidol University International College', 'Business Economics', '3', 'Participant', '', ''],
+  ['Wei Lam', 'wei.lam@example.com', '', 'The University of Hong Kong', 'Finance', '2', 'Partner club', '11:12', 'Beam'],
+  ['Pimchanok Rattana', 'pimchanok.r@example.com', '', 'Kasetsart University', 'Economics', '4', 'Participant', '', ''],
+  ['Siwakorn Meesuk', 'siwakorn.m@example.com', '', 'Chulalongkorn University', 'Engineering', '3', 'Participant', '', ''],
+  ['Arisa Thongdee', 'arisa.t@example.com', '', 'Srinakharinwirot University', 'Economics', '1', 'Committee', '11:02', 'Mint'],
+  ['Jirayu Somchai', 'jirayu.s@example.com', '', 'Thammasat University', 'Political Science', '2', 'Participant', '', ''],
+  ['Benjamas Kaew', 'benjamas.k@example.com', '', 'Mahidol University International College', 'Marketing', '4', 'Participant', '', '']
+];
+const IDS = ['BS26-K7Q2XM', 'BS26-H4WN8R', 'BS26-P9TC3D', 'BS26-B2LV6S', 'BS26-M8ZQ4K', 'BS26-R3YF7N', 'BS26-T6GJ2W', 'BS26-C5XD9P', 'BS26-N2HK8V', 'BS26-W7RB3Q'];
+const ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const newId = used => { let id; do { id = 'BS26-' + Array.from({ length: 6 }, () => ABC[Math.floor(Math.random() * ABC.length)]).join(''); } while (used.has(id)); return id; };
+function mockDB() {
+  let d = local.get('bs26-demo2');
+  if (!Array.isArray(d)) {
+    d = SAMPLE.map((s, i) => { const at = s[7] ? new Date('2026-12-12T' + s[7] + ':00+07:00').toISOString() : '';
+      return { id: IDS[i], name: s[0], email: s[1], googleEmail: s[2], phone: '08' + (31000000 + i * 4730021), university: s[3], faculty: s[4], year: s[5], type: s[6], notes: '', checkedIn: !!s[7], checkedInAt: at, checkedInBy: s[8], updatedAt: at }; });
+    local.set('bs26-demo2', d);
+  }
+  return d;
+}
+const findByCode = (list, code) => {
+  const c = String(code || '').trim(), m = c.toUpperCase().match(/BS26-[A-Z0-9]{6}/);
+  if (m) return list.find(g => g.id === m[0]);
+  const e = c.toLowerCase(); if (e.includes('@')) return list.find(g => g.email === e || g.googleEmail === e);
+  return null;
+};
+async function mock(action, p) {
+  await new Promise(r => setTimeout(r, 200));
+  const d = mockDB(), save = () => local.set('bs26-demo2', d), clone = o => JSON.parse(JSON.stringify(o));
+  if (p.pass !== 'mokra2026') throw new Error('Wrong passcode. In this preview it is mokra2026');
+  switch (action) {
+    case 'adminLogin': return { appUrl: '', sheetUrl: '' };
+    case 'list': return clone(d);
+    case 'checkin': { const g = findByCode(d, p.code); if (!g) return { result: 'notfound', code: String(p.code || '').slice(0, 60) };
+      if (g.checkedIn) return { result: 'already', guest: clone(g) };
+      g.checkedIn = true; g.checkedInAt = new Date().toISOString(); g.checkedInBy = p.by || ''; g.updatedAt = g.checkedInAt; save(); return { result: 'ok', guest: clone(g) }; }
+    case 'undo': { const g = d.find(x => x.id === p.id); if (!g) throw new Error('Guest not found'); g.checkedIn = false; g.checkedInAt = ''; g.checkedInBy = ''; save(); return clone(g); }
+    case 'save': { const r = p.rec || {}, e2 = String(r.email || '').trim().toLowerCase(), gm = String(r.googleEmail || '').trim().toLowerCase();
+      if (!r.name || !/.+@.+\..+/.test(e2)) throw new Error('Name and a valid email are needed');
+      if (d.some(x => x.id !== r.id && (x.email === e2 || (gm && (x.googleEmail === gm || x.email === gm))))) throw new Error('That email is already on the list');
+      let g = r.id ? d.find(x => x.id === r.id) : null;
+      if (!g) { g = { id: newId(new Set(d.map(x => x.id))), checkedIn: false, checkedInAt: '', checkedInBy: '' }; d.push(g); }
+      ['name', 'phone', 'university', 'faculty', 'year', 'type', 'notes'].forEach(k => { g[k] = String(r[k] || '').trim(); }); g.email = e2; g.googleEmail = gm; g.updatedAt = new Date().toISOString(); save(); return clone(g); }
+    case 'remove': { const i = d.findIndex(x => x.id === p.id); if (i > -1) d.splice(i, 1); save(); return true; }
+    case 'import': { let added = 0, skipped = 0; const used = new Set(d.map(x => x.id));
+      (p.rows || []).forEach(r => { const e2 = String(r.email || '').trim().toLowerCase(); if (!r.name || !/.+@.+\..+/.test(e2) || d.some(x => x.email === e2)) { skipped++; return; }
+        const id = newId(used); used.add(id); d.push({ id, name: r.name, email: e2, googleEmail: String(r.googleEmail || '').toLowerCase(), phone: r.phone || '', university: r.university || '', faculty: r.faculty || '', year: r.year || '', type: r.type || 'Participant', notes: '', checkedIn: false, checkedInAt: '', checkedInBy: '', updatedAt: new Date().toISOString() }); added++; });
+      save(); return { added, skipped }; }
+  }
+  throw new Error('Unknown action');
+}
+
+/* ---------- QR ---------- */
+function drawQR(canvas, text) {
+  const dpr = Math.min(window.devicePixelRatio || 1, 3), size = Math.round((canvas.clientWidth || 180) * dpr); canvas.width = size; canvas.height = size;
+  const ctx = canvas.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, size, size);
+  if (typeof qrcode !== 'function') { ctx.fillStyle = '#0a1462'; ctx.font = '800 ' + Math.round(size / 11) + 'px Montserrat'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(text, size / 2, size / 2); return; }
+  const q = qrcode(0, 'M'); q.addData(text); q.make(); const n = q.getModuleCount(), cell = Math.floor(size / n), off = Math.floor((size - cell * n) / 2);
+  ctx.fillStyle = '#0a1462'; for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) ctx.fillRect(off + c * cell, off + r * cell, cell, cell);
+}
+
+/* ---------- sound ---------- */
+let audio = null;
+function unlockAudio() { try { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); if (audio.state === 'suspended') audio.resume(); } catch (e) {} }
+function beep(kind) {
+  if (audio) {
+    const notes = kind === 'ok' ? [[880, 0], [1320, .11]] : kind === 'already' ? [[520, 0], [520, .16]] : [[200, 0], [160, .14]];
+    notes.forEach(([f, t]) => { const o = audio.createOscillator(), g = audio.createGain(); o.type = kind === 'notfound' ? 'sawtooth' : 'sine'; o.frequency.value = f;
+      g.gain.setValueAtTime(.0001, audio.currentTime + t); g.gain.exponentialRampToValueAtTime(.25, audio.currentTime + t + .02); g.gain.exponentialRampToValueAtTime(.0001, audio.currentTime + t + .14);
+      o.connect(g).connect(audio.destination); o.start(audio.currentTime + t); o.stop(audio.currentTime + t + .16); });
+  }
+  try { navigator.vibrate && navigator.vibrate(kind === 'ok' ? 80 : [60, 60, 60]); } catch (e) {}
+}
+
+/* ---------- state ---------- */
+const S = { admin: null, list: [], tab: 'scan', filter: 'all', q: '', recent: [] };
+const app = $('#app');
+if (DEMO) $('#demoNote').innerHTML = '<div class="demo">Preview with sample guests, saved only in this browser. Passcode <b>mokra2026</b>. <a href="index.html">Open the attendee pass preview</a></div>';
+
+function renderLogin(msg) {
+  const saved = sess.get('bs26-desk') || {};
+  app.innerHTML = `
+  <form class="card login" id="lf" novalidate>
+    <div class="k">Beyond Strategy · 12 Dec 2026</div>
+    <h1 style="margin-top:4px">Registration desk</h1>
+    <p class="mute" style="margin-top:6px">For the MOKRA committee. Your name is saved next to each guest you check in.</p>
+    <label for="by">Your name</label><input id="by" autocomplete="name" placeholder="e.g. Mint" value="${esc(saved.by || '')}">
+    <label for="pw">Committee passcode</label><input id="pw" type="password" autocomplete="current-password">
+    <button class="btn primary" id="lb">Open the desk</button>
+    <p class="err" id="le" role="alert">${esc(msg || '')}</p>
+  </form>`;
+  $('#lf').addEventListener('submit', async e => {
+    e.preventDefault(); unlockAudio();
+    const pass = $('#pw').value, by = $('#by').value.trim();
+    if (!by) { $('#le').textContent = 'Add your name so check-ins show who scanned them.'; return; }
+    const b = $('#lb'); b.disabled = true; b.textContent = 'Opening…';
+    try { await enter(pass, by); } catch (err) { $('#le').textContent = err.message; b.disabled = false; b.textContent = 'Open the desk'; }
+  });
+}
+async function enter(pass, by) {
+  const info = await call('adminLogin', { pass });
+  S.admin = { pass, by, appUrl: info.appUrl || '', sheetUrl: info.sheetUrl || '' };
+  sess.set('bs26-desk', { pass, by });
+  S.list = await call('list', { pass });
+  renderDesk();
+}
+const A = p => Object.assign({ pass: S.admin.pass, by: S.admin.by }, p);
+
+function renderDesk() {
+  const a = S.admin;
+  app.innerHTML = `
+  <div class="head"><div><h1>Registration desk</h1><p class="mute">Checking in as <b>${esc(a.by)}</b></p></div></div>
+  <section class="card stats" id="stats"></section>
+  <nav class="seg" role="tablist">
+    <button role="tab" data-tab="scan">Scan</button><button role="tab" data-tab="guests">Guests</button><button role="tab" data-tab="add">Add</button>
+  </nav>
+  <section id="panel"></section>
+  <div class="links">
+    ${a.appUrl ? '<button class="btn small" data-act="copylink">Copy attendee pass link</button>' : ''}
+    ${/^https:\/\//.test(a.sheetUrl) ? `<a class="btn small" href="${esc(a.sheetUrl)}" target="_blank" rel="noopener">Open Google Sheet</a>` : ''}
+    <button class="btn small" data-act="out">Sign out</button>
+  </div>`;
+  updateStats(); showTab(S.tab);
+}
+function updateStats() {
+  const el = $('#stats'); if (!el) return;
+  const total = S.list.length, arrived = S.list.filter(g => g.checkedIn).length, pct = total ? Math.round(arrived / total * 100) : 0;
+  const last = S.list.filter(g => g.checkedIn && g.checkedInAt).sort((x, y) => String(y.checkedInAt).localeCompare(String(x.checkedInAt)))[0];
+  el.innerHTML = `
+    <div class="top"><div class="big"><span id="arrN">${shownArrived === null ? arrived : shownArrived}</span> <small>of ${total} arrived</small></div><b>${pct}%</b></div>
+    <div class="meter"><i style="width:${pct}%"></i></div>
+    <div class="sgrid">
+      <div><small>Still to come</small><b>${total - arrived}</b></div>
+      <div><small>Participants in</small><b>${S.list.filter(g => g.checkedIn && (g.type || 'Participant') === 'Participant').length}</b></div>
+      <div><small>Last in</small><b>${last ? esc(String(last.name).split(/\s+/)[0]) + ' · ' + esc(fmtTime(last.checkedInAt)) : '–'}</b></div>
+    </div>`;
+  countUp($('#arrN'), shownArrived, arrived); shownArrived = arrived;
+  const m = total ? Math.floor(arrived / total * 4) : 0;
+  if (lastMilestone === null) lastMilestone = m;
+  else if (m > lastMilestone) { lastMilestone = m; if (MILESTONES[m]) { setTimeout(() => { confetti(); toast(MILESTONES[m]); }, 2300); } }
+  else if (m < lastMilestone) lastMilestone = m;
+}
+function showTab(t) {
+  if (t !== 'scan') stopCam();
+  S.tab = t;
+  document.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === t)));
+  if (t === 'scan') renderScan(); else if (t === 'guests') renderGuests(); else renderAdd();
+}
+async function refresh() {
+  if (!S.admin || document.visibilityState !== 'visible') return;
+  try { S.list = await call('list', A({})); updateStats(); if (S.tab === 'guests') renderRows(); } catch (e) {}
+}
+setInterval(refresh, 15000);
+
+/* ---------- scan ---------- */
+const cam = { stream: null, on: false, last: '', lastAt: 0, busy: false, t: 0, det: null };
+try { if ('BarcodeDetector' in window) cam.det = new BarcodeDetector({ formats: ['qr_code'] }); } catch (e) { cam.det = null; }
+function renderScan() {
+  $('#panel').innerHTML = `
+  <div class="scan-grid">
+    <div>
+      <div class="vf" id="vf">
+        <video id="vid" playsinline muted></video>
+        <svg class="frame" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M16 28V16h12M72 16h12v12M84 72v12H72M28 84H16V72" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>
+        <div class="laser"></div>
+        <div class="idle"><p id="camMsg">Point the camera at a guest's QR. Each scan checks them in straight away.</p><button class="btn" data-act="startcam">Start camera</button></div>
+      </div>
+      <div class="vf-bar"><button class="btn" data-act="snap">Snap a photo</button><button class="btn" data-act="stopcam" id="stopBtn" disabled>Pause camera</button></div>
+    </div>
+    <div class="card">
+      <h2>Check in by hand</h2>
+      <p class="mute" style="margin-top:4px">Type a pass ID or the guest's email.</p>
+      <form class="inline" id="manual"><input id="mi" placeholder="BS26-… or email" autocomplete="off" aria-label="Pass ID or email"><button class="btn primary">Check in</button></form>
+      <h2 style="margin-top:20px">Recent on this phone</h2>
+      <ul class="recent" id="recent"></ul>
+    </div>
+  </div>`;
+  $('#manual').addEventListener('submit', e => { e.preventDefault(); unlockAudio(); const v = $('#mi').value.trim(); if (v) { doCheckin(v); $('#mi').value = ''; } });
+  paintRecent();
+}
+function paintRecent() {
+  const ul = $('#recent'); if (!ul) return;
+  ul.innerHTML = S.recent.length ? S.recent.map(r => `<li><span class="r-${r.kind}">${esc(r.label)}</span><time>${esc(r.time)}</time></li>`).join('') : '<li class="mute">Nothing scanned yet.</li>';
+}
+async function startCam() {
+  unlockAudio();
+  const msg = $('#camMsg');
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { msg.textContent = 'Live camera isn’t available here. Use “Snap a photo” instead.'; return; }
+  try {
+    cam.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false });
+    const v = $('#vid'); v.srcObject = cam.stream; await v.play();
+    cam.on = true; $('#vf').classList.add('on'); $('#stopBtn').disabled = false; requestAnimationFrame(tick);
+  } catch (e) {
+    msg.textContent = 'The live camera can’t be used on this page' + (e && e.name ? ' (' + e.name + ')' : '') + '. Tap Snap a photo: your camera app opens, you take a picture of the guest’s QR, and they’re checked in.';
+    const b = document.querySelector('.idle [data-act=startcam]'); if (b) { b.dataset.act = 'snap'; b.textContent = 'Snap a photo'; }
+  }
+}
+function stopCam() {
+  cam.on = false; if (cam.stream) { cam.stream.getTracks().forEach(t => t.stop()); cam.stream = null; }
+  const vf = $('#vf'); if (vf) vf.classList.remove('on'); const sb = $('#stopBtn'); if (sb) sb.disabled = true;
+}
+const work = document.createElement('canvas');
+async function decode(src, w, h) {
+  if (cam.det) { try { const r = await cam.det.detect(src); if (r && r[0]) return r[0].rawValue; } catch (e) {} }
+  if (typeof jsQR !== 'function' || !w || !h) return null;
+  const sc = Math.min(1, 720 / Math.max(w, h)); work.width = Math.round(w * sc); work.height = Math.round(h * sc);
+  const ctx = work.getContext('2d', { willReadFrequently: true }); ctx.drawImage(src, 0, 0, work.width, work.height);
+  const r = jsQR(ctx.getImageData(0, 0, work.width, work.height).data, work.width, work.height, { inversionAttempts: 'attemptBoth' });
+  return r ? r.data : null;
+}
+async function tick() {
+  if (!cam.on) return;
+  const v = $('#vid'), now = performance.now();
+  if (v && v.readyState >= 2 && !cam.busy && $('#result').hidden && now - cam.t > 160) {
+    cam.t = now; cam.busy = true;
+    try { const code = await decode(v, v.videoWidth, v.videoHeight); if (code && !(code === cam.last && Date.now() - cam.lastAt < 5000)) { cam.last = code; cam.lastAt = Date.now(); await doCheckin(code); } } catch (e) {}
+    cam.busy = false;
+  }
+  requestAnimationFrame(tick);
+}
+async function snapFile(file) {
+  if (!file) return;
+  try {
+    const bmp = await (window.createImageBitmap ? createImageBitmap(file) : new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = URL.createObjectURL(file); }));
+    const code = await decode(bmp, bmp.width, bmp.height);
+    if (code) await doCheckin(code); else toast('No QR code found. Try again a little closer.');
+  } catch (e) { toast('Could not read that photo'); }
+}
+async function doCheckin(code) {
+  try {
+    const r = await call('checkin', A({ code }));
+    if (r.guest) { const i = S.list.findIndex(g => g.id === r.guest.id); if (i > -1) S.list[i] = r.guest; else S.list.push(r.guest); }
+    S.recent.unshift({ kind: r.result, label: r.result === 'notfound' ? 'Not on list' : r.guest.name + (r.result === 'already' ? ' (already in)' : ''), time: fmtTime(new Date().toISOString()) });
+    S.recent = S.recent.slice(0, 8); paintRecent(); updateStats(); if (S.tab === 'guests') renderRows();
+    showResult(r); return r;
+  } catch (e) { toast(e.message); }
+}
+function showResult(r) {
+  const ov = $('#result'), g = r.guest || {}, sub = [g.university, g.type].filter(Boolean).join(' · ');
+  ov.className = 'ov result ' + r.result;
+  ov.innerHTML = r.result === 'ok'
+    ? `<div><div class="ic">✓</div><h2>Checked in</h2><div class="who">${esc(g.name)}</div><p>${esc(sub)}</p><small>Tap to continue</small></div>`
+    : r.result === 'already'
+    ? `<div><div class="ic">!</div><h2>Already checked in</h2><div class="who">${esc(g.name)}</div><p>At ${esc(fmtTime(g.checkedInAt))}${g.checkedInBy ? ' by ' + esc(g.checkedInBy) : ''}</p><small>Tap to continue</small></div>`
+    : `<div><div class="ic">×</div><h2>Not on the list</h2><p>Search their name or email under Guests, or add them under Add.</p><small>Tap to continue</small></div>`;
+  ov.hidden = false; beep(r.result);
+  if (r.result === 'ok') { const vf = $('#vf'); if (vf) { vf.classList.remove('flash'); void vf.offsetWidth; vf.classList.add('flash'); } }
+  clearTimeout(showResult.t); showResult.t = setTimeout(() => { ov.hidden = true; }, r.result === 'ok' ? 1800 : 3500);
+}
+
+/* ---------- guests ---------- */
+function renderGuests() {
+  $('#panel').innerHTML = `
+  <div class="tools">
+    <input id="gq" type="search" placeholder="Search name, email, university or pass ID" value="${esc(S.q)}" aria-label="Search guests">
+    <div class="tools-row"><div class="chips" id="gf"></div><button class="btn small" data-act="csv">Copy CSV</button></div>
+  </div>
+  <div class="glist" id="glist"></div>`;
+  $('#gq').addEventListener('input', e => { S.q = e.target.value; renderRows(); });
+  renderRows();
+}
+function renderRows() {
+  const box = $('#glist'); if (!box) return;
+  const all = S.list, arrived = all.filter(g => g.checkedIn).length, f = $('#gf');
+  if (f) f.innerHTML = [['all', 'All', all.length], ['in', 'Arrived', arrived], ['wait', 'Not yet', all.length - arrived]].map(([k, l, n]) => `<button data-filter="${k}" aria-pressed="${S.filter === k}">${l} ${n}</button>`).join('');
+  const q = S.q.trim().toLowerCase();
+  const rows = all.filter(g => (S.filter === 'all' || (S.filter === 'in') === !!g.checkedIn) && (!q || [g.name, g.email, g.googleEmail, g.university, g.id].join(' ').toLowerCase().includes(q)))
+    .sort((x, y) => String(x.name).localeCompare(String(y.name)));
+  box.innerHTML = rows.length ? rows.map(g => `
+    <div class="g" data-open="${esc(g.id)}" tabindex="0" role="button" aria-label="Open ${esc(g.name)}">
+      <div><b>${esc(g.name)}</b><span class="s">${esc([g.university, g.email].filter(Boolean).join(' · '))}</span></div>
+      <div class="end"><span class="pill ${g.checkedIn ? 'in' : 'wait'}">${g.checkedIn ? 'In ' + esc(fmtTime(g.checkedInAt)) : 'Not yet'}</span>${g.checkedIn ? '' : `<button class="btn small qbtn" data-quick="${esc(g.id)}">Check in</button>`}</div>
+    </div>`).join('') : `<div class="empty">${all.length ? 'No guests match.' : 'No guests yet. Import them under Add, or paste rows into the Attendees tab of the Sheet.'}</div>`;
+}
+function csv() {
+  const cols = ['id', 'name', 'email', 'googleEmail', 'phone', 'university', 'faculty', 'year', 'type', 'checkedIn', 'checkedInAt', 'checkedInBy', 'notes'];
+  const q = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+  return [cols.join(',')].concat(S.list.map(g => cols.map(c => q(c === 'checkedInAt' ? fmtTime(g[c]) : g[c])).join(','))).join('\n');
+}
+
+/* ---------- drawer ---------- */
+function openDrawer(id) {
+  const g = id ? S.list.find(x => x.id === id) : null; if (id && !g) return;
+  const v = k => esc(g ? g[k] : '');
+  const dr = $('#drawer');
+  dr.innerHTML = `
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="Guest details">
+    <div class="sheet-head"><h2 style="font-size:19px">${g ? esc(g.name) : 'New guest'}</h2><button class="btn small" data-act="close">Close</button></div>
+    ${g ? `<div class="box">
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center"><div><div class="k">Pass ID</div><b style="letter-spacing:.05em">${esc(g.id)}</b></div>
+      <span class="pill ${g.checkedIn ? 'in' : 'wait'}">${g.checkedIn ? 'In ' + esc(fmtTime(g.checkedInAt)) + (g.checkedInBy ? ' · ' + esc(g.checkedInBy) : '') : 'Not checked in'}</span></div>
+      <div class="acts">${g.checkedIn ? `<button class="btn small" data-undo="${esc(g.id)}">Undo check-in</button>` : `<button class="btn small primary" data-quick="${esc(g.id)}">Check in now</button>`}
+        <button class="btn small" data-act="showqr">Show QR</button>${S.admin.appUrl ? '<button class="btn small" data-act="invite">Copy invite</button>' : ''}</div>
+      <div id="qrSlot"></div></div>` : ''}
+    <form id="gform" novalidate>
+      <label for="f_name">Full name</label><input id="f_name" value="${v('name')}">
+      <label for="f_email">Registered email</label><input id="f_email" type="email" value="${v('email')}">
+      <label for="f_gmail">Google account for the pass (if different)</label><input id="f_gmail" type="email" placeholder="e.g. name@gmail.com" value="${v('googleEmail')}">
+      <div class="f2">
+        <div><label for="f_phone">Phone</label><input id="f_phone" type="tel" value="${v('phone')}"></div>
+        <div><label for="f_type">Type</label><select id="f_type">${TYPES.map(t => `<option ${(g ? g.type : 'Participant') === t ? 'selected' : ''}>${t}</option>`).join('')}</select></div>
+        <div><label for="f_uni">University</label><input id="f_uni" value="${v('university')}"></div>
+        <div><label for="f_fac">Faculty / major</label><input id="f_fac" value="${v('faculty')}"></div>
+        <div><label for="f_year">Year</label><input id="f_year" value="${v('year')}"></div>
+      </div>
+      <label for="f_notes">Committee notes</label><textarea id="f_notes" style="min-height:80px">${v('notes')}</textarea>
+      <p class="err" id="gErr" role="alert"></p>
+      <div style="display:grid;gap:8px"><button class="btn primary block">${g ? 'Save changes' : 'Add guest'}</button>${g ? `<button type="button" class="btn danger block" data-del="${esc(g.id)}">Remove guest</button>` : ''}</div>
+    </form>
+  </div>`;
+  dr.hidden = false; dr.dataset.id = id || '';
+  $('#gform').addEventListener('submit', async e => {
+    e.preventDefault();
+    const rec = { id: id || '', name: $('#f_name').value.trim(), email: $('#f_email').value.trim(), googleEmail: $('#f_gmail').value.trim(), phone: $('#f_phone').value.trim(), type: $('#f_type').value, university: $('#f_uni').value.trim(), faculty: $('#f_fac').value.trim(), year: $('#f_year').value.trim(), notes: $('#f_notes').value.trim() };
+    if (!rec.name || !/.+@.+\..+/.test(rec.email)) { $('#gErr').textContent = 'Add a name and a valid email.'; return; }
+    try { const saved = await call('save', A({ rec })); const i = S.list.findIndex(x => x.id === saved.id); if (i > -1) S.list[i] = saved; else S.list.push(saved);
+      toast(id ? 'Saved' : 'Added · ' + saved.id); closeDrawer(); updateStats(); if (S.tab === 'guests') renderRows(); }
+    catch (err) { $('#gErr').textContent = err.message; }
+  });
+}
+function closeDrawer() { const d = $('#drawer'); d.hidden = true; d.innerHTML = ''; }
+function invite(g) {
+  return `Hi ${String(g.name).split(/\s+/)[0]}, you're confirmed for ${EVENT.name}!\n\n${EVENT.date}, ${EVENT.time}\n${EVENT.place}\n\nGet your entry QR code here: ${S.admin.appUrl}\nTap Continue with Google (account ${g.googleEmail || g.email}) or type the email you registered with: ${g.email}.\n\nPlease bring your laptop or tablet: the lab is practical and highly interactive.\n\nSee you there,\nMOKRA Consulting`;
+}
+
+/* ---------- add / import ---------- */
+function renderAdd() {
+  $('#panel').innerHTML = `
+  <div class="add-grid">
+    <div class="card"><h2>Add one guest</h2><p>For late confirmations or approved walk-ins. They get a pass ID right away.</p><button class="btn primary block" style="margin-top:14px" data-act="new">New guest</button></div>
+    <div class="card"><h2>Import from the form sheet</h2>
+      <p>Copy the selected rows from your Google Form responses, including the header row, and paste them here. Name and email columns are matched automatically. Emails already on the list are skipped.</p>
+      <label for="imp">Rows to import</label>
+      <textarea id="imp" placeholder="Timestamp&#9;Email address&#9;Full name&#9;University …"></textarea>
+      <p class="preview" id="ip"></p>
+      <button class="btn primary block" data-act="import" id="ib" disabled>Import guests</button></div>
+  </div>`;
+  $('#imp').addEventListener('input', () => { const rows = parseRows($('#imp').value), known = new Set(S.list.map(g => g.email)), fresh = rows.filter(r => !known.has(r.email)).length;
+    $('#ip').textContent = rows.length ? `${rows.length} found · ${fresh} new · ${rows.length - fresh} already on the list` : ($('#imp').value.trim() ? 'No rows with a name and an email yet. Include the header row.' : '');
+    $('#ib').disabled = !fresh; });
+}
+function splitCSV(line) { const out = []; let cur = '', q = false; for (let i = 0; i < line.length; i++) { const ch = line[i];
+  if (q) { if (ch === '"' && line[i + 1] === '"') { cur += '"'; i++; } else if (ch === '"') q = false; else cur += ch; }
+  else if (ch === '"') q = true; else if (ch === ',') { out.push(cur); cur = ''; } else cur += ch; } out.push(cur); return out; }
+function parseRows(txt) {
+  const lines = String(txt).split(/\r?\n/).filter(l => l.trim()); if (!lines.length) return [];
+  const sep = lines[0].includes('\t') ? '\t' : ',', split = l => sep === '\t' ? l.split('\t') : splitCSV(l);
+  let cols = ['name', 'email', 'phone', 'university', 'faculty', 'year'], start = 0;
+  const head = split(lines[0]).map(s => s.trim().toLowerCase());
+  if (head.some(h => /mail|อีเมล/.test(h)) && !head.some(h => h.includes('@'))) {
+    start = 1;
+    cols = head.map(h => /google|gmail/.test(h) ? 'googleEmail' : /mail|อีเมล/.test(h) ? 'email' : /phone|tel|mobile|โทร/.test(h) ? 'phone' : /univ|institution|school|มหาวิทยาลัย/.test(h) ? 'university' : /facult|major|program|คณะ|สาขา/.test(h) ? 'faculty' : /year|ชั้นปี/.test(h) ? 'year' : /^type$|role/.test(h) ? 'type' : /name|ชื่อ/.test(h) ? 'name' : '');
+    const seen = new Set(); cols = cols.map(c => { if (!c || seen.has(c)) return ''; seen.add(c); return c; });
+    if (!cols.includes('email') && cols.includes('googleEmail')) cols = cols.map(c => c === 'googleEmail' ? 'email' : c);
+  }
+  const out = [], dup = new Set();
+  lines.slice(start).forEach(l => { const cells = split(l), r = {}; cols.forEach((c, i) => { if (c) r[c] = String(cells[i] || '').trim(); });
+    r.email = String(r.email || '').toLowerCase();
+    if (r.name && /.+@.+\..+/.test(r.email) && !dup.has(r.email)) { dup.add(r.email); if (!TYPES.includes(r.type)) r.type = 'Participant'; out.push(r); } });
+  return out;
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click', async e => {
+  const t = e.target.closest('[data-act],[data-tab],[data-filter],[data-quick],[data-undo],[data-del],[data-open]');
+  if (!t) { if (e.target.id === 'drawer') closeDrawer(); return; }
+  if (t.dataset.quick) { e.stopPropagation(); unlockAudio(); const id = t.dataset.quick, r = await doCheckin(id); if (r && !$('#drawer').hidden) openDrawer(id); return; }
+  if (t.dataset.undo) { try { const g = await call('undo', A({ id: t.dataset.undo })); const i = S.list.findIndex(x => x.id === g.id); if (i > -1) S.list[i] = g; updateStats(); renderRows(); openDrawer(g.id); toast('Check-in undone'); } catch (err) { toast(err.message); } return; }
+  if (t.dataset.del) { if (t.dataset.armed !== '1') { t.dataset.armed = '1'; t.textContent = 'Tap again to remove'; setTimeout(() => { if (t.isConnected) { t.dataset.armed = ''; t.textContent = 'Remove guest'; } }, 3500); return; }
+    try { await call('remove', A({ id: t.dataset.del })); S.list = S.list.filter(x => x.id !== t.dataset.del); closeDrawer(); updateStats(); renderRows(); toast('Guest removed'); } catch (err) { toast(err.message); } return; }
+  if (t.dataset.open) { openDrawer(t.dataset.open); return; }
+  if (t.dataset.tab) { showTab(t.dataset.tab); return; }
+  if (t.dataset.filter) { S.filter = t.dataset.filter; renderRows(); return; }
+  switch (t.dataset.act) {
+    case 'out': stopCam(); sess.del('bs26-desk'); S.admin = null; shownArrived = null; lastMilestone = null; return renderLogin();
+    case 'copylink': return copyText(S.admin.appUrl);
+    case 'startcam': return startCam();
+    case 'stopcam': return stopCam();
+    case 'snap': unlockAudio(); $('#snap').value = ''; return $('#snap').click();
+    case 'csv': return copyText(csv());
+    case 'new': return openDrawer(null);
+    case 'close': return closeDrawer();
+    case 'showqr': { const id = $('#drawer').dataset.id; $('#qrSlot').innerHTML = '<div class="mini-qr"><canvas></canvas></div>'; return drawQR($('#qrSlot canvas'), id); }
+    case 'invite': { const g = S.list.find(x => x.id === $('#drawer').dataset.id); return g && copyText(invite(g)); }
+    case 'import': { const rows = parseRows($('#imp').value); t.disabled = true; t.textContent = 'Importing…';
+      try { const r = await call('import', A({ rows })); S.list = await call('list', A({})); updateStats(); toast(`${r.added} added · ${r.skipped} skipped`); $('#imp').value = ''; $('#ip').textContent = ''; }
+      catch (err) { toast(err.message); t.disabled = false; }
+      t.textContent = 'Import guests'; return; }
+  }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { if (!$('#drawer').hidden) closeDrawer(); $('#result').hidden = true; }
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('[data-open]')) { e.preventDefault(); openDrawer(e.target.dataset.open); }
+});
+$('#result').addEventListener('click', () => { $('#result').hidden = true; });
+$('#snap').addEventListener('change', e => snapFile(e.target.files && e.target.files[0]));
+document.addEventListener('visibilitychange', refresh);
+
+(async () => {
+  const saved = sess.get('bs26-desk');
+  if (saved && saved.pass) { try { await enter(saved.pass, saved.by); return; } catch (e) {} }
+  renderLogin();
+})();
+})();
+</script>
+</body>
+</html>
